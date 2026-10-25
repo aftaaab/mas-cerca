@@ -1,0 +1,1366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Más Cerca</title>
+<meta name="description" content="Un quiz para Aftab y Jael · A quiz for Aftab and Jael">
+<meta property="og:title" content="Más Cerca">
+<meta property="og:description" content="Un quiz para Aftab y Jael · A quiz for Aftab and Jael">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F3F0F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16111B" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='24' cy='32' r='18' fill='%23A86E0C'/%3E%3Ccircle cx='40' cy='32' r='18' fill='%2313737A' fill-opacity='.85'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&family=Gloock&display=swap">
+<style>
+/* Layout: one phone-width column. Quiz = one question per screen. Results = a long read built on two-colour dot strips: gold is Aftab (Abu Dhabi), teal is Jael (Lima). */
+:root{
+  --bg:#F3F0F6; --surface:#FFFFFF; --ink:#24182C; --muted:#6D6176; --line:#E1D9E7;
+  --rose:#B3325B; --rose-soft:#F7DFE7;
+  --gold:#A86E0C; --gold-soft:#F6E8CC;
+  --teal:#13737A; --teal-soft:#D4EEEE;
+  --good:#2D7A4D; --warn:#A6560F;
+  --blend:multiply;
+  --f-display:"Gloock", "Georgia", "Times New Roman", serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --me:var(--rose); --me-soft:var(--rose-soft);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16111B; --surface:#211A28; --ink:#F2EAF5; --muted:#A797B1; --line:#382D41;
+    --rose:#EE7499; --rose-soft:#3E2231;
+    --gold:#E4AA44; --gold-soft:#3B2F17;
+    --teal:#5DC1C5; --teal-soft:#16383A;
+    --good:#73CC94; --warn:#F0A55C;
+    --blend:screen; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16111B; --surface:#211A28; --ink:#F2EAF5; --muted:#A797B1; --line:#382D41;
+  --rose:#EE7499; --rose-soft:#3E2231;
+  --gold:#E4AA44; --gold-soft:#3B2F17;
+  --teal:#5DC1C5; --teal-soft:#16383A;
+  --good:#73CC94; --warn:#F0A55C;
+  --blend:screen; color-scheme:dark;
+}
+body[data-slot="a"]{--me:var(--gold);--me-soft:var(--gold-soft)}
+body[data-slot="b"]{--me:var(--teal);--me-soft:var(--teal-soft)}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+img{max-width:100%}
+a.btn{text-decoration:none}
+.linkbox{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);min-width:0}
+.linkbox .row{display:flex;gap:8px;flex-wrap:wrap}
+.linkbox .btn{min-height:42px;padding:10px 18px;font-size:15px}
+.linkin{width:100%;min-width:0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:400 13px var(--f-mono)}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--f-body); font-size:16px; line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:calc(14px + env(safe-area-inset-top, 0px)) calc(48px + env(safe-area-inset-bottom, 0px));
+  margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.shell{max-width:540px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--rose);outline-offset:2px;border-radius:8px}
+h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
+p{margin:0}
+
+/* header: two clocks */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.clocks{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.clock{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.clock .city{font:500 10px/1.2 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.clock .t{font:500 15px/1.2 var(--f-mono);font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px}
+.clock .t::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.clock.a{--c:var(--gold)} .clock.b{--c:var(--teal);align-items:flex-end}
+.span{flex:1;min-width:24px;display:flex;align-items:center;gap:6px;color:var(--muted);font:500 10px var(--f-mono);letter-spacing:.06em}
+.span::before,.span::after{content:"";flex:1;border-top:1.5px dotted var(--line)}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:2px;background:var(--surface);flex-shrink:0}
+.lang button{border:0;background:transparent;font:500 12px var(--f-mono);letter-spacing:.04em;padding:6px 10px;border-radius:999px;color:var(--muted);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+/* generic */
+.screen{display:flex;flex-direction:column;gap:22px;animation:rise .28s ease-out}
+@keyframes rise{from{opacity:.35;transform:translateY(6px)}to{opacity:1;transform:none}}
+.eyebrow{font:500 11px/1.3 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--rose)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:600 16px var(--f-body);padding:14px 22px;border-radius:999px;border:0;background:var(--ink);color:var(--bg);cursor:pointer;min-height:50px;transition:transform .12s, opacity .12s}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.text{background:transparent;color:var(--muted);padding-inline:6px;min-height:40px}
+.btn.wide{width:100%}
+.banner{padding:12px 14px;border-radius:12px;background:var(--rose-soft);font-size:14px}
+
+/* welcome */
+.hero{display:flex;flex-direction:column;gap:14px}
+.hero h1{font-family:var(--f-display);font-size:clamp(46px,14vw,68px);line-height:.92;letter-spacing:-.01em}
+.hero h1 em{font-style:normal;color:var(--rose)}
+.lead{font-size:17px;max-width:62ch}
+.orbs{position:relative;height:84px;width:100%;max-width:100%}
+.orb{position:absolute;top:6px;width:72px;height:72px;border-radius:50%;mix-blend-mode:var(--blend);opacity:.9}
+.orb.a{background:var(--gold);left:0}
+.orb.b{background:var(--teal)}
+.facts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.facts li{display:flex;gap:12px;align-items:baseline;font-size:15px}
+.facts li::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;background:var(--rose);transform:translateY(-2px)}
+.status{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);font-size:15px}
+.status .pip{width:10px;height:10px;border-radius:50%;background:var(--pc);flex-shrink:0}
+.status.a{--pc:var(--gold)} .status.b{--pc:var(--teal)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pc,var(--rose));border-radius:3px;transition:width .4s}
+.who-pick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.who-pick button{padding:22px 12px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font:400 26px var(--f-display);display:flex;flex-direction:column;align-items:center;gap:10px}
+.who-pick button::before{content:"";width:16px;height:16px;border-radius:50%;background:var(--pc)}
+.who-pick .a{--pc:var(--gold)} .who-pick .b{--pc:var(--teal)}
+
+/* quiz */
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px}
+.progress{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.seg{height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.seg i{display:block;height:100%;background:var(--me)}
+.savestate{font:500 11px var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.savestate.fail{color:var(--warn)}
+.qtext{font-weight:600;font-size:clamp(22px,6.2vw,28px);line-height:1.22;letter-spacing:-.005em;text-wrap:balance}
+.intro h2{font-family:var(--f-display);font-size:clamp(40px,12vw,56px);line-height:.95}
+.intro p{font-size:18px;max-width:52ch}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{text-align:left;padding:13px 16px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);font-weight:500;font-size:16px;cursor:pointer;display:flex;gap:12px;align-items:center;min-height:52px;transition:border-color .15s, background .15s}
+.opt::before{content:"";flex-shrink:0;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);transition:all .15s}
+.opt.sq::before{border-radius:5px}
+.opt[aria-pressed="true"]{border-color:var(--me);background:var(--me-soft)}
+.opt[aria-pressed="true"]::before{border-color:var(--me);background:var(--me);box-shadow:inset 0 0 0 3px var(--surface)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sc{aspect-ratio:1/1;max-width:100%;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);font:500 20px var(--f-mono);cursor:pointer;transition:all .15s}
+.sc[aria-pressed="true"]{background:var(--me);border-color:var(--me);color:var(--surface)}
+.ends{display:flex;justify-content:space-between;gap:16px;font-size:13px;color:var(--muted)}
+.ends span:last-child{text-align:right}
+textarea{width:100%;min-height:150px;resize:vertical;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:400 17px/1.5 var(--f-body)}
+textarea:focus{outline:none;border-color:var(--me)}
+.ynm{display:flex;flex-direction:column}
+.ynm-row{display:flex;flex-direction:column;gap:8px;padding:14px 0;border-bottom:1px solid var(--line)}
+.ynm-row:first-child{padding-top:0}
+.ynm-row .lbl{font-weight:500}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg3 button{padding:9px 6px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;cursor:pointer}
+.seg3 button[aria-pressed="true"][data-v="y"]{background:var(--me);border-color:var(--me);color:var(--surface)}
+.seg3 button[aria-pressed="true"][data-v="m"]{background:var(--me-soft);border-color:var(--me)}
+.seg3 button[aria-pressed="true"][data-v="n"]{background:var(--line);border-color:var(--muted)}
+.nav{display:flex;gap:10px;align-items:center;justify-content:flex-end}
+.nav .spacer{flex:1}
+.counter{font:500 12px var(--f-mono);color:var(--muted)}
+
+/* waiting */
+.wait .orbs .orb.b{animation:drift 3.6s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-18px)}}
+.confirm{display:flex;flex-direction:column;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.confirm .row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* results */
+.rhero{display:flex;flex-direction:column;gap:16px}
+.rhero h1{font-family:var(--f-display);font-size:clamp(44px,13vw,64px);line-height:.95}
+.rhero h1 .amp{color:var(--rose)}
+.rhero h1 .n.a{color:var(--gold)} .rhero h1 .n.b{color:var(--teal)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);min-width:0}
+.stat .v{font:400 28px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.stat .v small{font:500 12px var(--f-mono);color:var(--muted)}
+.stat .k{font-size:12.5px;color:var(--muted);line-height:1.3}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.who{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+.who::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--pc)}
+.who.a{--pc:var(--gold)} .who.b{--pc:var(--teal)}
+.who .me{font-weight:400;color:var(--muted)}
+.rs{display:flex;flex-direction:column;gap:16px;padding-top:26px;border-top:1px solid var(--line)}
+.rs > h2{font-family:var(--f-display);font-size:32px;line-height:1.05}
+.rs > .sub{color:var(--muted);font-size:15px;margin-top:-8px;max-width:60ch}
+.items{display:flex;flex-direction:column;gap:18px}
+.item{display:flex;flex-direction:column;gap:9px;min-width:0}
+.item .t{font-weight:600;font-size:15px}
+.item .tip{font-size:15px;color:var(--ink);display:flex;gap:10px;align-items:baseline}
+.item .tip b{font:500 10.5px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--rose);flex-shrink:0}
+.pill{display:inline-block;font:500 10.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--line);color:var(--ink);vertical-align:2px;margin-left:6px}
+.pill.ok{background:color-mix(in srgb, var(--good) 18%, transparent);color:var(--good)}
+.pill.part{background:color-mix(in srgb, var(--warn) 16%, transparent);color:var(--warn)}
+.strip{display:flex;flex-direction:column;gap:6px}
+.track{position:relative;height:22px}
+.track::before{content:"";position:absolute;left:10px;right:10px;top:50%;height:2px;background:var(--line);transform:translateY(-50%)}
+.tick{position:absolute;top:50%;width:6px;height:6px;border-radius:50%;background:var(--line);transform:translate(-50%,-50%);left:calc(10px + (100% - 20px) * var(--x))}
+.dot{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;transform:translate(-50%,-50%);left:calc(10px + (100% - 20px) * var(--x));border:2px solid var(--bg)}
+.dot.a{background:var(--gold)} .dot.b{background:var(--teal)}
+.dot.ab{background:linear-gradient(90deg,var(--gold) 50%,var(--teal) 50%)}
+.strip .ends{font-size:12.5px}
+.lines{display:flex;flex-direction:column;gap:6px}
+.line{display:flex;gap:10px;align-items:baseline;font-size:15px;min-width:0}
+.line .who{flex-shrink:0;min-width:58px;font-size:14px}
+.line .val{min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;padding:5px 11px;border-radius:999px;font-size:14px;background:var(--cs,var(--line));line-height:1.35}
+.chip.a{--cs:var(--gold-soft)} .chip.b{--cs:var(--teal-soft)} .chip.both{--cs:var(--rose-soft)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:var(--surface);border:1px solid var(--line);min-width:0}
+.meter{display:flex;flex-direction:column;gap:4px}
+.meter .k{font-size:12.5px;color:var(--muted)}
+.pips{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.pips i{height:6px;border-radius:3px;background:var(--line)}
+.pips.a i.on{background:var(--gold)} .pips.b i.on{background:var(--teal)}
+.note{padding:14px 16px;border-radius:14px;background:var(--rose-soft);font-size:15px;display:flex;flex-direction:column;gap:6px}
+.quote{margin:0;display:flex;flex-direction:column;gap:6px}
+.quote blockquote{margin:0;font-size:16.5px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;padding-left:14px;border-left:2px solid var(--pc,var(--line))}
+.quote.a{--pc:var(--gold)} .quote.b{--pc:var(--teal)}
+.quote figcaption{font-size:13px;color:var(--muted)}
+.letter{padding:22px 20px;border-radius:18px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.letter .from{font-family:var(--f-display);font-size:26px}
+.letter p{white-space:pre-wrap;overflow-wrap:anywhere;font-size:17px;line-height:1.6}
+details{border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+details summary{cursor:pointer;padding:12px 14px;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;gap:10px}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+";font:500 16px var(--f-mono);color:var(--muted)}
+details[open] summary::after{content:"–"}
+details .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
+.guess{display:flex;flex-direction:column;gap:4px;padding-block:10px;border-bottom:1px solid var(--line)}
+.guess:last-child{border-bottom:0}
+.guess .t{font-weight:600;font-size:15px}
+.guess .g{font-size:14px;color:var(--muted)}
+.guess .g b{color:var(--ink);font-weight:500}
+.ai{display:flex;flex-direction:column;gap:14px}
+.ai .sum{font-size:17px;line-height:1.55}
+.ai h3{font:500 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--rose)}
+.ai ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.thinking{display:flex;align-items:center;gap:10px;color:var(--muted)}
+.thinking::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--rose);animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.25}to{opacity:1}}
+.foot{display:flex;flex-direction:column;gap:12px;padding-top:26px;border-top:1px solid var(--line)}
+
+@media (max-width:360px){ .stats{grid-template-columns:1fr} .pair{grid-template-columns:1fr} }
+@media (prefers-reduced-motion: reduce){ *{animation:none!important;transition:none!important} }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top" id="top"></header>
+  <main id="app" aria-live="polite"></main>
+</div>
+<script type="module">
+(function(){
+"use strict";
+
+/* =====================================================================
+   1. PASTE YOUR FIREBASE CONFIG HERE
+   Firebase console → Project settings → Your apps → Web app → firebaseConfig
+   (This config is meant to be public; the Firestore rules protect the data.)
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD4LFuWrgGGFodzzy7meZGxbmj8BSOVqvo",
+  authDomain: "quizapp-74872.firebaseapp.com",
+  projectId: "quizapp-74872",
+  storageBucket: "quizapp-74872.firebasestorage.app",
+  messagingSenderId: "141166544737",
+  appId: "1:141166544737:web:f63c224be1d835b3b7e720"
+};
+const FIREBASE_VERSION = "10.12.2";
+
+
+/* ---------- people ---------- */
+const NAMES = { a: "Aftab", b: "Jael" };
+const other = s => (s === "a" ? "b" : "a");
+
+/* ---------- content helpers ---------- */
+const L = (en, es) => ({ en, es });
+const O = (k, en, es) => ({ k, en, es });
+
+/* ---------- desire list ---------- */
+const YNM = [
+  L("Flirty texts during the day", "Mensajes coquetos durante el día"),
+  L("Sending each other photos", "Enviarnos fotos"),
+  L("Intimate video calls", "Videollamadas íntimas"),
+  L("Sharing fantasies", "Contarnos fantasías"),
+  L("Describing what we’ll do when we meet", "Describir lo que haremos cuando nos veamos"),
+  L("Planning a special reunion night", "Planear una noche especial de reencuentro"),
+  L("Slow and romantic", "Lento y romántico"),
+  L("More playful and adventurous", "Más juego y aventura"),
+  L("Dressing up for each other", "Arreglarnos el uno para el otro"),
+  L("Role play", "Juegos de rol"),
+  L("Trying something completely new", "Probar algo totalmente nuevo"),
+  L("Toys", "Juguetes"),
+  L("Reading or listening to something sensual together", "Leer o escuchar algo sensual juntos"),
+  L("Long massages when we’re together", "Masajes largos cuando estemos juntos"),
+  L("A weekend away, just us", "Un fin de semana fuera, solo nosotros")
+].map((x, i) => Object.assign({ k: "y" + i }, x));
+
+const DATES_TIP = L(
+  "This is a big one. It doesn’t need an answer now, but it deserves its own calm conversation, maybe on your next long call.",
+  "Es un tema grande. No necesita respuesta ahora, pero merece su propia conversación tranquila, quizás en su próxima llamada larga."
+);
+
+/* ---------- the quiz ---------- */
+const SECTIONS = [
+{ id: "you", title: L("You", "Tú"),
+  intro: L("First, a little about who you are right now.", "Primero, un poco sobre quién eres ahora."),
+  qs: [
+  { id: "p_social", type: "scale", cat: "trait",
+    q: L("How social are you by nature?", "¿Qué tan sociable eres por naturaleza?"),
+    lo: L("I need lots of quiet", "Necesito mucha calma"), hi: L("People energise me", "La gente me llena de energía"),
+    short: L("Social energy", "Energía social") },
+  { id: "p_recharge", type: "single", cat: "trait",
+    q: L("What recharges you best?", "¿Qué te recarga más?"),
+    short: L("Recharges with", "Se recarga con"),
+    opts: [O("alone","Alone time","Tiempo a solas"), O("talk","Talking with someone close","Hablar con alguien cercano"), O("out","Going out","Salir"), O("rest","Sleep and rest","Dormir y descansar"), O("create","Something creative","Algo creativo"), O("move","Exercise","Hacer ejercicio")] },
+  { id: "p_plan", type: "scale", cat: "trait",
+    q: L("Do you like to plan, or go with the flow?", "¿Te gusta planear o dejarte llevar?"),
+    lo: L("I plan everything", "Planeo todo"), hi: L("I go with the flow", "Me dejo llevar"),
+    short: L("Planning style", "Estilo para planear") },
+  { id: "p_clock", type: "single", cat: "trait",
+    q: L("Morning person or night owl?", "¿Eres de mañana o de noche?"),
+    short: L("Best hours", "Mejores horas"),
+    opts: [O("am","Morning person","De mañana"), O("pm","Night owl","De noche"), O("dep","Depends on the day","Depende del día")] },
+  { id: "p_upset", type: "single", cat: "trait",
+    q: L("When you’re upset, what do you want first?", "Cuando estás mal, ¿qué necesitas primero?"),
+    short: L("When upset, wants", "Cuando está mal, necesita"),
+    opts: [O("space","Space to think","Espacio para pensar"), O("comfort","Comfort and closeness","Consuelo y cariño"), O("solve","Help solving it","Ayuda para resolverlo"), O("distract","Distraction, something light","Distraerse con algo ligero"), O("vent","To vent, no advice","Desahogarse, sin consejos")] },
+  { id: "p_conflict", type: "single", cat: "trait",
+    q: L("In an argument, your first instinct is to…", "En una discusión, tu primer impulso es…"),
+    short: L("In an argument", "En una discusión"),
+    opts: [O("now","Talk it out right away","Hablarlo enseguida"), O("later","Take time before talking","Tomarse un tiempo antes de hablar"), O("avoid","Go quiet and avoid it","Callarse y evitarlo"), O("heat","Get heated, then calm down","Acalorarse y luego calmarse"), O("sorry","Apologise fast to end it","Pedir perdón rápido para terminarla")] },
+  { id: "p_silence", type: "single", cat: "trait",
+    q: L("If {p} goes quiet for a few hours, you usually feel…", "Si {p} pasa unas horas sin escribirte, normalmente te sientes…"),
+    short: L("When the other goes quiet", "Cuando el otro no escribe"),
+    opts: [O("fine","Fine, life gets busy","Tranquil[o|a], la vida es ocupada"), O("curious","A little curious","Con un poco de curiosidad"), O("anxious","Anxious","Ansios[o|a]"), O("hurt","Hurt or ignored","Dolid[o|a] o ignorad[o|a]")] },
+  { id: "p_love", type: "multi", max: 2, cat: "trait",
+    q: L("What makes you feel most loved? Pick two.", "¿Qué te hace sentir más amad[o|a]? Elige dos."),
+    short: L("Feels loved through", "Cómo recibe amor"),
+    opts: [O("words","Kind words and compliments","Palabras bonitas y halagos"), O("time","Quality time, full attention","Tiempo de calidad, atención total"), O("gifts","Thoughtful gifts","Regalos pensados con cariño"), O("acts","Acts of help and care","Gestos de ayuda y cuidado"), O("touch","Physical touch, when together","Contacto físico, cuando estamos juntos"), O("include","Being part of each other’s plans","Ser parte de los planes del otro")] },
+  { id: "p_proud", type: "text", optional: true, cat: "words",
+    q: L("Something about yourself you’re proud of lately", "Algo de ti de lo que estés orgullos[o|a] últimamente"),
+    short: L("Proud of lately", "Orgullo reciente") }
+]},
+{ id: "now", title: L("Right now", "Ahora mismo"),
+  intro: L("Be honest more than nice here. This is a snapshot of the moment, not a verdict.", "Aquí vale más ser sincer[o|a] que quedar bien. Es una foto del momento, no un juicio."),
+  qs: [
+  { id: "m_mood", type: "scale", cat: "mood",
+    q: L("How has your mood been this past week?", "¿Cómo ha estado tu ánimo esta última semana?"),
+    lo: L("Really low", "Muy bajo"), hi: L("Really good", "Muy bueno"), short: L("Mood", "Ánimo") },
+  { id: "m_stress", type: "scale", cat: "mood",
+    q: L("How stressed are you right now?", "¿Cuánto estrés tienes ahora mismo?"),
+    lo: L("Calm", "Tranquil[o|a]"), hi: L("Overwhelmed", "Sobrepasad[o|a]"), short: L("Stress", "Estrés") },
+  { id: "m_energy", type: "scale", cat: "mood",
+    q: L("How much energy is left at the end of your day?", "¿Cuánta energía te queda al final del día?"),
+    lo: L("Running on empty", "Voy en reserva"), hi: L("Plenty", "Bastante"), short: L("Energy", "Energía") },
+  { id: "m_drain", type: "multi", max: 3, cat: "mood",
+    q: L("What’s taking most of your energy lately? Up to three.", "¿Qué te está quitando más energía últimamente? Hasta tres."),
+    short: L("Taking energy", "Le quita energía"),
+    opts: [O("work","Work","Trabajo"), O("study","Studies","Estudios"), O("jobs","Job hunting","Buscar trabajo"), O("family","Family","Familia"), O("health","Health","Salud"), O("money","Money","Dinero"), O("future","Worrying about the future","Preocuparme por el futuro"), O("missing","Missing {p}","Extrañar a {p}"), O("sleep","Not sleeping well","Dormir mal"), O("lonely","Feeling lonely","Sentirme sol[o|a]")] },
+  { id: "m_loved", type: "scale", cat: "rating",
+    q: L("Lately, how loved do you feel by {p}?", "Últimamente, ¿qué tan amad[o|a] te sientes por {p}?"),
+    lo: L("Not much", "No mucho"), hi: L("Completely", "Totalmente"),
+    short: L("Feeling loved lately", "Cuánto amor siente últimamente"),
+    tip: { low: L("Check how each of you receives love further down, and do one of those things on purpose this week.", "Revisen más abajo cómo recibe amor cada uno, y hagan una de esas cosas a propósito esta semana.") } },
+  { id: "m_close", type: "scale", cat: "rating",
+    q: L("How close do you feel to {p} these past few weeks?", "¿Qué tan cerca te sientes de {p} estas últimas semanas?"),
+    lo: L("Far apart", "Muy lejos"), hi: L("Very close", "Muy cerca"),
+    short: L("Feeling close lately", "Cercanía últimamente"),
+    tip: { low: L("Distance grows in the quiet. Share small moments: a photo of lunch, a 20-second voice note, the song stuck in your head.", "La distancia crece en el silencio. Compartan momentos pequeños: una foto del almuerzo, una nota de voz de 20 segundos, la canción que no se les sale de la cabeza.") } },
+  { id: "m_help", type: "single", cat: "need",
+    q: L("What would help you most this week?", "¿Qué te ayudaría más esta semana?"),
+    short: L("Would help most this week", "Le ayudaría más esta semana"),
+    opts: [O("talk","More time to talk","Más tiempo para hablar"), O("space","Patience and a bit of space","Paciencia y un poco de espacio"), O("reassure","Words that reassure me","Palabras que me den tranquilidad"), O("practical","Help with something practical","Ayuda con algo práctico"), O("fun","Something fun and light","Algo divertido y ligero"), O("listen","Someone who just listens","Alguien que solo me escuche")] },
+  { id: "m_unsaid", type: "text", optional: true, cat: "words",
+    q: L("Is there something on your mind you haven’t said out loud yet?", "¿Hay algo en tu mente que todavía no has dicho en voz alta?"),
+    short: L("On their mind", "Lo que tenía en mente") }
+]},
+{ id: "us", title: L("Us", "Nosotros"),
+  intro: L("How we’re doing as a pair, from 9 hours apart.", "Cómo estamos como pareja, a 9 horas de distancia."),
+  qs: [
+  { id: "u_freq", type: "scale", cat: "rating",
+    q: L("How happy are you with how often we talk right now?", "¿Qué tan feliz estás con lo seguido que hablamos ahora?"),
+    lo: L("Not at all", "Nada"), hi: L("Very happy", "Muy feliz"),
+    short: L("How often we talk", "Lo seguido que hablamos"),
+    tip: { low: L("Agree on one small fixed ritual, like a 10-minute call at the same time each day, instead of waiting for free time to appear.", "Acuerden un ritual pequeño y fijo, como una llamada de 10 minutos a la misma hora cada día, en vez de esperar a que aparezca tiempo libre."),
+           gap: L("One of you is happier with the rhythm than the other. Talk about what a good week of contact looks like for each of you.", "Uno está más contento con el ritmo que el otro. Hablen de cómo se ve una buena semana de contacto para cada uno.") } },
+  { id: "u_quality", type: "scale", cat: "rating",
+    q: L("And with the quality of our conversations?", "¿Y con la calidad de nuestras conversaciones?"),
+    lo: L("Rushed", "Apuradas"), hi: L("Full and real", "Completas y reales"),
+    short: L("Quality of our talks", "Calidad de nuestras charlas"),
+    tip: { low: L("Once a week, have one call with nothing else going on. Each of you brings one question that goes deeper than “how was your day”.", "Una vez por semana, tengan una llamada sin hacer nada más. Cada uno trae una pregunta que vaya más allá de “¿cómo estuvo tu día?”.") } },
+  { id: "u_contact", type: "multi", max: 2, cat: "pref",
+    q: L("Your favourite ways to stay close? Pick two.", "¿Tus formas favoritas de sentirnos cerca? Elige dos."),
+    short: L("Favourite ways to stay close", "Formas favoritas de estar cerca"),
+    opts: [O("video","Long video calls","Videollamadas largas"), O("texts","Little texts through the day","Mensajitos durante el día"), O("voice","Voice notes","Notas de voz"), O("together","Watching or playing something together","Ver o jugar algo juntos"), O("gmgn","Good-morning and good-night messages","Mensajes de buenos días y buenas noches"), O("surprise","Letters, photos, surprises","Cartas, fotos, sorpresas")],
+    tip: { gap: L("Your favourite ways differ, which is easy to fix: each week, do one of each other’s.", "Sus formas favoritas son distintas, y eso tiene fácil solución: cada semana, hagan una de las del otro.") } },
+  { id: "u_amount", type: "single", cat: "pref", ord: ["quick","some","onoff","long"],
+    q: L("How much contact feels right on a normal day?", "¿Cuánto contacto te parece ideal en un día normal?"),
+    short: L("Contact on a normal day", "Contacto en un día normal"),
+    opts: [O("quick","A quick check-in is enough","Con un saludo rápido basta"), O("some","A few messages and one short call","Unos mensajes y una llamada corta"), O("onoff","Texting on and off all day","Escribirnos a ratos todo el día"), O("long","A long call every day","Una llamada larga todos los días")],
+    tip: { gap: L("You picture a normal day differently. Agree on a middle ground and say it out loud, so nobody is left guessing.", "Se imaginan un día normal de forma distinta. Busquen un punto medio y díganlo en voz alta, para que nadie se quede adivinando.") } },
+  { id: "u_time", type: "single", cat: "pref",
+    q: L("Best time for our calls?", "¿Mejor hora para nuestras llamadas?"),
+    short: L("Best time to call", "Mejor hora para llamar"),
+    opts: [O("t1","Lima 6–8 am · Abu Dhabi 3–5 pm","Lima 6–8 a. m. · Abu Dabi 3–5 p. m."), O("t2","Lima 9 am–noon · Abu Dhabi 6–9 pm","Lima 9 a. m.–mediodía · Abu Dabi 6–9 p. m."), O("t3","Lima noon–2 pm · Abu Dhabi 9–11 pm","Lima mediodía–2 p. m. · Abu Dabi 9–11 p. m."), O("t4","Weekends, longer and slower","Fines de semana, más largas y tranquilas"), O("t5","Any time, kept flexible","Cuando sea, de forma flexible")],
+    tip: { gap: L("Pick one slot that works in both cities and protect it like an appointment.", "Elijan un horario que funcione en las dos ciudades y protéjanlo como una cita.") } },
+  { id: "u_heard", type: "scale", cat: "rating",
+    q: L("When you share something, how heard do you feel?", "Cuando cuentas algo, ¿qué tan escuchad[o|a] te sientes?"),
+    lo: L("Rarely", "Casi nunca"), hi: L("Always", "Siempre"),
+    short: L("Feeling heard", "Sentir que le escuchan"),
+    tip: { low: L("Try reflecting back: before you reply, sum up in one line what you heard. It feels small and changes a lot.", "Prueben repetir lo que escucharon: antes de responder, resuman en una frase lo que dijo el otro. Parece poco y cambia mucho.") } },
+  { id: "u_honest", type: "scale", cat: "rating",
+    q: L("I can tell {p} anything, even the hard things.", "Puedo contarle cualquier cosa a {p}, incluso lo difícil."),
+    lo: L("Not really", "No mucho"), hi: L("Completely", "Totalmente"),
+    short: L("Can say anything", "Poder decir cualquier cosa"),
+    tip: { low: L("Make hard things safe to say: thank each other for being honest before reacting to what was said.", "Hagan que sea seguro decir lo difícil: agradezcan la sinceridad antes de reaccionar a lo que se dijo.") } },
+  { id: "u_fights", type: "scale", cat: "rating",
+    q: L("How well do we handle disagreements?", "¿Qué tan bien manejamos los desacuerdos?"),
+    lo: L("Badly", "Mal"), hi: L("Really well", "Muy bien"),
+    short: L("Handling disagreements", "Manejar desacuerdos"),
+    tip: { low: L("Agree on one rule: if a text conversation gets tense, switch to a voice or video call. Tone gets lost in writing.", "Acuerden una regla: si una conversación por mensaje se pone tensa, pasen a una llamada o videollamada. El tono se pierde al escribir.") } },
+  { id: "u_strength", type: "multi", max: 3, cat: "strength",
+    q: L("What are we best at? Up to three.", "¿En qué somos mejores? Hasta tres."),
+    short: L("What we’re best at", "En qué somos mejores"),
+    opts: [O("laugh","Making each other laugh","Hacernos reír"), O("honest","Being honest","Ser sinceros"), O("goals","Backing each other’s goals","Apoyar las metas del otro"), O("hard","Getting through hard times","Superar momentos difíciles"), O("dream","Dreaming about the future","Soñar con el futuro"), O("affection","Showing affection","Demostrar cariño"), O("trust","Trust","Confianza"), O("effort","Making the effort despite the distance","Esforzarnos a pesar de la distancia")] },
+  { id: "u_drain", type: "multi", max: 3, cat: "drain",
+    q: L("What’s getting in our way lately? Up to three.", "¿Qué se nos está interponiendo últimamente? Hasta tres."),
+    short: L("Getting in the way", "Lo que se interpone"),
+    opts: [O("tz","The time difference","La diferencia horaria"), O("busy","Busy schedules","Agendas llenas"), O("tired","Being tired","El cansancio"), O("distance","The distance itself","La distancia en sí"), O("text","Misreading each other over text","Malinterpretarnos por mensaje"), O("lang","Language","El idioma"), O("money","Money","El dinero"), O("unknown","Not knowing when we’ll see each other","No saber cuándo nos veremos"), O("none","Nothing, we’re good","Nada, estamos bien")] }
+]},
+{ id: "heart", title: L("Heart", "Corazón"),
+  intro: L("What you need to feel loved, especially on the hard days.", "Lo que necesitas para sentirte amad[o|a], sobre todo en los días difíciles."),
+  qs: [
+  { id: "h_more", type: "multi", max: 3, cat: "need",
+    q: L("What do you need more of from {p}? Up to three.", "¿Qué necesitas más de {p}? Hasta tres."),
+    short: L("Needs more of", "Necesita más"),
+    opts: [O("reassure","Reassurance","Seguridad y tranquilidad"), O("patience","Patience","Paciencia"), O("questions","Questions about my day","Preguntas sobre mi día"), O("plans","Plans for our future","Planes para nuestro futuro"), O("words","Affection in words","Cariño en palabras"), O("play","Fun and playfulness","Diversión y juego"), O("deep","Deeper conversations","Conversaciones más profundas"), O("appreciate","Appreciation for what I do","Que valore lo que hago"), O("open","Openness about feelings","Que me cuente cómo se siente")] },
+  { id: "h_reassure", type: "scale", cat: "pref",
+    q: L("How much reassurance do you need in a long-distance relationship?", "¿Cuánta seguridad necesitas en una relación a distancia?"),
+    lo: L("Very little", "Muy poca"), hi: L("A lot", "Mucha"),
+    short: L("Reassurance needed", "Seguridad que necesita"),
+    tip: { gap: L("One of you needs more reassurance than the other. Neither is wrong, and it costs little to offer it without being asked.", "Uno necesita más seguridad que el otro. Ninguno está mal, y cuesta poco ofrecerla sin que se la pidan.") } },
+  { id: "h_support", type: "single", cat: "need",
+    q: L("On a bad day, what helps most from {p}?", "En un mal día, ¿qué es lo que más te ayuda de {p}?"),
+    short: L("On a bad day", "En un mal día"),
+    opts: [O("call","A phone or video call","Una llamada o videollamada"), O("msg","A sweet message, then space","Un mensaje bonito y luego espacio"), O("laugh","Humour, a reason to laugh","Humor, un motivo para reír"), O("listen","Asking what happened and listening","Preguntar qué pasó y escuchar"), O("plans","Talking about our plans together","Hablar de nuestros planes juntos"), O("fix","Help fixing the problem","Ayuda para resolver el problema")] },
+  { id: "h_love_most", type: "text", cat: "words",
+    q: L("Something {p} does that you love", "Algo que hace {p} y que te encanta") },
+  { id: "h_wish", type: "text", cat: "words",
+    q: L("Something you wish {p} did more often", "Algo que te gustaría que {p} hiciera más seguido") },
+  { id: "h_hurt", type: "text", optional: true, cat: "words",
+    q: L("Has something hurt a little lately that you’d like to talk about?", "¿Algo te ha dolido un poco últimamente y te gustaría hablarlo?"),
+    short: L("Would like to talk about", "Quisiera hablar de") }
+]},
+{ id: "desire", title: L("Desire", "Deseo"),
+  intro: L("In the list, only what you both mark yes or maybe will ever be shown. If one of you says no, the other never sees what you chose.", "En la lista, solo se mostrará lo que ambos marquen con sí o tal vez. Si uno dice que no, el otro nunca verá lo que eligió."),
+  qs: [
+  { id: "d_satisf", type: "scale", cat: "rating",
+    q: L("How satisfied are you with our intimacy right now, with the distance?", "¿Qué tan satisfech[o|a] estás con nuestra intimidad ahora, con la distancia?"),
+    lo: L("Not at all", "Nada"), hi: L("Very", "Mucho"),
+    short: L("Intimacy right now", "Intimidad ahora"),
+    tip: { low: L("Talk about it outside the moment, when you’re both relaxed. Start from the “you both want” list below.", "Háblenlo fuera del momento, cuando estén tranquilos. Empiecen por la lista de “los dos quieren” de más abajo.") } },
+  { id: "d_often", type: "single", cat: "pref", ord: ["daily","few","weekly"],
+    q: L("How often would you like flirty or intimate moments between us?", "¿Con qué frecuencia te gustarían momentos coquetos o íntimos entre nosotros?"),
+    short: L("How often", "Con qué frecuencia"),
+    opts: [O("daily","Every day","Todos los días"), O("few","A few times a week","Varias veces por semana"), O("weekly","About once a week","Más o menos una vez por semana"), O("mood","Whenever the mood strikes","Cuando surja"), O("less","Less than now","Menos que ahora")],
+    tip: { gap: L("Your rhythms differ a little. Talk about what “often” means to each of you; small flirty moments in between help close the gap.", "Sus ritmos son un poco distintos. Hablen de lo que significa “seguido” para cada uno; los pequeños momentos coquetos entre medio ayudan a acercarse.") } },
+  { id: "d_init", type: "single", cat: "pref", persp: true,
+    q: L("Who would you like to make the first move more often?", "¿Quién te gustaría que diera el primer paso más seguido?"),
+    short: L("Who makes the first move", "Quién da el primer paso"),
+    opts: [O("self","Me","Yo"), O("partner","{p}","{p}"), O("both","Both of us equally","Los dos por igual"), O("fine","It’s fine as it is","Está bien así")],
+    tip: { gap: L("You see this differently. Say what you’d like out loud; it’s easier than hoping it happens.", "Lo ven distinto. Digan en voz alta lo que les gustaría; es más fácil que esperar a que pase.") } },
+  { id: "d_desired", type: "multi", max: 3, cat: "need",
+    q: L("What makes you feel most desired? Up to three.", "¿Qué te hace sentir más desead[o|a]? Hasta tres."),
+    short: L("Feels desired through", "Lo que le hace sentir deseo"),
+    opts: [O("attractive","Being told I’m attractive","Que me digan que soy atractiv[o|a]"), O("flirty","Flirty texts out of nowhere","Mensajes coquetos de la nada"), O("missed","Hearing how much {p} misses me","Escuchar cuánto me extraña {p}"), O("voice","Voice notes","Notas de voz"), O("dressup","Video dates where we dress up","Citas por video arreglándonos"), O("plan","Planning our next time together","Planear nuestra próxima vez juntos"), O("only","Being looked at like no one else exists","Que me miren como si no existiera nadie más")] },
+  { id: "d_talk", type: "scale", cat: "rating",
+    q: L("How comfortable are you talking about what you want in bed?", "¿Qué tan cómod[o|a] te sientes hablando de lo que quieres en la intimidad?"),
+    lo: L("Very shy", "Me da mucha vergüenza"), hi: L("Totally open", "Totalmente abiert[o|a]"),
+    short: L("Talking about desire", "Hablar del deseo"),
+    tip: { low: L("Shyness is normal. Writing things down first, like you just did, is a gentle way in.", "La timidez es normal. Escribirlo primero, como acaban de hacer, es una forma suave de empezar.") } },
+  { id: "d_ynm", type: "ynm", cat: "ynm",
+    q: L("Would you like to do these, or do more of them?", "¿Te gustaría hacer esto, o hacerlo más?") },
+  { id: "d_wish", type: "text", optional: true, cat: "words",
+    q: L("Anything you’d like {p} to know about your desires? {p} will see this.", "¿Algo que quieras que {p} sepa sobre tus deseos? {p} lo verá.") }
+]},
+{ id: "future", title: L("Future", "Futuro"),
+  intro: L("Where this is going, as each of you sees it.", "Hacia dónde vamos, según cada uno."),
+  qs: [
+  { id: "f_close", type: "scale", cat: "pref",
+    q: L("How often do you think about closing the distance?", "¿Qué tan seguido piensas en dejar de estar a distancia?"),
+    lo: L("Rarely", "Casi nunca"), hi: L("All the time", "Todo el tiempo"),
+    short: L("Thinking about closing the distance", "Pensar en acortar la distancia"),
+    tip: { gap: L("One of you thinks about this much more. Share what you each imagine, without needing a plan yet.", "Uno piensa en esto mucho más que el otro. Compartan lo que imagina cada uno, sin necesidad de tener un plan todavía.") } },
+  { id: "f_when", type: "single", cat: "pref", ord: ["y1","y2","y3"],
+    q: L("When would you like us to be in the same city?", "¿Cuándo te gustaría que estuviéramos en la misma ciudad?"),
+    short: L("Same city by", "Misma ciudad en"),
+    opts: [O("y1","Within a year","En menos de un año"), O("y2","In 1–2 years","En 1 o 2 años"), O("y3","In 2–3 years","En 2 o 3 años"), O("norush","When the time is right, no rush","Cuando sea el momento, sin prisa"), O("unsure","I’m not sure yet","Todavía no lo sé")],
+    tip: { gap: DATES_TIP } },
+  { id: "f_where", type: "single", cat: "pref",
+    q: L("Where could you see us living?", "¿Dónde te imaginas que podríamos vivir?"),
+    short: L("Where to live", "Dónde vivir"),
+    opts: [O("ad","Abu Dhabi","Abu Dabi"), O("lima","Lima","Lima"), O("new","Somewhere new for both of us","Un lugar nuevo para los dos"), O("work","Wherever the work is","Donde haya trabajo"), O("unsure","Haven’t thought about it","No lo he pensado")],
+    tip: { gap: DATES_TIP } },
+  { id: "f_visit", type: "single", cat: "pref",
+    q: L("Your dream next visit?", "¿Cómo sería tu próxima visita soñada?"),
+    short: L("Dream next visit", "Próxima visita soñada"),
+    opts: [O("home","Quiet days at home together","Días tranquilos en casa juntos"), O("city","Exploring a new city","Explorar una ciudad nueva"), O("beach","Beach and sun","Playa y sol"), O("family","Meeting each other’s families","Conocer a nuestras familias"), O("adventure","Adventure: mountains, desert, road trip","Aventura: montañas, desierto, viaje por carretera")],
+    tip: { gap: L("Different dream trips. Plan the next visit with a bit of both.", "Sueñan viajes distintos. Planeen la próxima visita con un poco de cada uno.") } },
+  { id: "f_year", type: "text", optional: true, cat: "words",
+    q: L("Where do you see us a year from now?", "¿Dónde nos ves dentro de un año?"),
+    short: L("A year from now", "Dentro de un año") },
+  { id: "f_soon", type: "text", optional: true, cat: "words",
+    q: L("One thing you’d love us to do together soon, even from afar", "Algo que te encantaría que hiciéramos juntos pronto, aunque sea a distancia"),
+    short: L("Soon, together", "Pronto, juntos") }
+]},
+{ id: "know", title: L("How well do you know {p}?", "¿Qué tan bien conoces a {p}?"),
+  intro: L("Now answer as {p} would. No peeking, no pressure.", "Ahora responde como lo haría {p}. Sin trampa y sin presión."),
+  qs: [
+  { id: "g_recharge", guess: "p_recharge", cat: "guess", q: L("What recharges {p} best?", "¿Qué recarga más a {p}?") },
+  { id: "g_upset", guess: "p_upset", cat: "guess", q: L("When upset, what does {p} want first?", "Cuando está mal, ¿qué necesita primero {p}?") },
+  { id: "g_conflict", guess: "p_conflict", cat: "guess", q: L("In an argument, {p}’s first instinct is to…", "En una discusión, el primer impulso de {p} es…") },
+  { id: "g_love", guess: "p_love", cat: "guess", q: L("What makes {p} feel most loved? Pick two.", "¿Qué hace que {p} se sienta más amad[a|o]? Elige dos.") },
+  { id: "g_contact", guess: "u_contact", cat: "guess", q: L("{p}’s favourite ways to stay close? Pick two.", "¿Las formas favoritas de {p} para sentirse cerca? Elige dos.") },
+  { id: "g_support", guess: "h_support", cat: "guess", q: L("On a bad day, what helps {p} most?", "En un mal día, ¿qué es lo que más ayuda a {p}?") },
+  { id: "g_visit", guess: "f_visit", cat: "guess", q: L("{p}’s dream next visit?", "¿Cómo sería la próxima visita soñada de {p}?") }
+]},
+{ id: "note", title: L("A note", "Una nota"),
+  intro: L("Last one. Write it as if only {p} will read it, because only {p} will.", "La última. Escríbela como si solo {p} fuera a leerla, porque así será."),
+  qs: [
+  { id: "l_note", type: "text", cat: "letter",
+    q: L("Write {p} a few lines. {p} will read them with the results.", "Escríbele unas líneas a {p}. Las leerá junto con los resultados.") }
+]}
+];
+
+/* ---------- build flow ---------- */
+const QMAP = {}; const FLOW = []; const ALLQ = [];
+SECTIONS.forEach((sec, si) => {
+  FLOW.push({ kind: "intro", si });
+  sec.qs.forEach(q => { q.si = si; QMAP[q.id] = q; ALLQ.push(q); FLOW.push({ kind: "q", si, q }); });
+});
+ALLQ.forEach(q => { if (q.guess) { const t = QMAP[q.guess]; q.type = t.type; q.opts = t.opts; q.max = t.max; } });
+const QCOUNT = ALLQ.length;
+
+/* ---------- UI copy ---------- */
+const U = {
+  loading: L("Opening your quiz…", "Abriendo tu quiz…"),
+  apart: L("9 h", "9 h"),
+  ad: L("Abu Dhabi", "Abu Dabi"), lima: L("Lima", "Lima"),
+  nodbT: L("Open this inside Claude", "Ábrelo dentro de Claude"),
+  nodbB: L("This quiz keeps both of your answers in Claude. Open it from the link Aftab shared, signed in to your Claude account.", "Este quiz guarda las respuestas de los dos en Claude. Ábrelo desde el enlace que compartió Aftab, con tu cuenta de Claude iniciada."),
+  errT: L("Answers didn’t load", "No cargaron las respuestas"),
+  errB: L("Check your connection and reload. If you’re Aftab and this keeps happening, check the Firestore rules step.", "Revisa tu conexión y recarga la página. Si esto sigue pasando, avísale a Aftab."),
+  cfgT: L("Add your Firebase config", "Falta la configuración"),
+  cfgB: L("Open index.html, paste your firebaseConfig into the FIREBASE_CONFIG block at the top of the script, and upload it again.", "Abre index.html, pega tu firebaseConfig en el bloque FIREBASE_CONFIG al inicio del script y vuelve a subirlo."),
+  setT: L("Set up your quiz", "Prepara el quiz"),
+  setB: L("This creates a private pair of links, one for Aftab and one for Jael. Anyone with a link can open it, so send Jael’s only to Jael.", "Esto crea un par de enlaces privados, uno para Aftab y otro para Jael. Cualquiera con un enlace puede abrirlo, así que envía el de Jael solo a Jael."),
+  setNote: L("If Aftab already sent you a link, open that one instead.", "Si Aftab ya te envió un enlace, abre ese."),
+  create: L("Create our links", "Crear nuestros enlaces"),
+  linkFor: L("{name}’s link", "Enlace de {name}"),
+  openMine: L("Open my quiz", "Abrir mi quiz"),
+  copy: L("Copy", "Copiar"), copied: L("Copied", "Copiado"), share: L("Share", "Compartir"),
+  sendHer: L("Send {p} this link. Only {p}.", "Envíale este enlace a {p}. Solo a {p}."),
+  shareA: L("Our quiz. Answer on your own; results unlock when we’re both done.", "Nuestro quiz. Responde por tu cuenta; los resultados se abren cuando los dos terminemos."),
+  whoT: L("Who’s answering?", "¿Quién responde?"),
+  whoB: L("This device will remember.", "Este dispositivo lo recordará."),
+  ro: L("You can open this page but can’t save answers yet. Ask {p} to share it with you by email as an Editor.", "Puedes abrir esta página pero todavía no puedes guardar respuestas. Pídele a {p} que te la comparta por correo como Editor."),
+  kicker: L("A quiz for two", "Un quiz para dos"),
+  hi: L("Hi, {me}.", "Hola, {me}."),
+  lead: L("Answer on your own and be honest. When you’ve both finished, this page shows what you share, what to work on, and how to love each other better from 9 hours apart.", "Responde por tu cuenta y con sinceridad. Cuando los dos terminen, esta página les mostrará lo que comparten, en qué trabajar y cómo quererse mejor a 9 horas de distancia."),
+  f1: L("About 15 minutes, and it saves as you go", "Unos 15 minutos, y se guarda solo"),
+  f2: L("Results appear only once you’ve both finished", "Los resultados aparecen solo cuando los dos terminen"),
+  f3: L("In the desire list, only what you both mark yes or maybe is ever shown", "En la lista de deseo, solo se muestra lo que ambos marquen con sí o tal vez"),
+  f4: L("Your written answers are shared with {p} in the results", "Tus respuestas escritas se comparten con {p} en los resultados"),
+  start: L("Start", "Empezar"), resume: L("Continue", "Continuar"),
+  resumeAt: L("You’ve answered {n} of {t}", "Llevas {n} de {t}"),
+  pNot: L("{p} hasn’t started yet", "{p} todavía no empieza"),
+  pProg: L("{p} is answering · {n} of {t}", "{p} está respondiendo · {n} de {t}"),
+  pDone: L("{p} has finished. Finish yours to see your results.", "{p} ya terminó. Termina el tuyo para ver los resultados."),
+  go: L("Let’s go", "Vamos"), qs: L("{n} questions", "{n} preguntas"), q1: L("1 question", "1 pregunta"),
+  back: L("Back", "Atrás"), next: L("Next", "Siguiente"), skip: L("Skip", "Omitir"), finish: L("Finish", "Terminar"),
+  optional: L("Optional", "Opcional"),
+  chosen: L("{n} of {max} chosen", "{n} de {max} elegidos"),
+  place: L("Write here…", "Escribe aquí…"),
+  saving: L("Saving…", "Guardando…"), saved: L("Saved", "Guardado"), saveFail: L("Not saved yet", "Aún no se guardó"),
+  yes: L("Yes", "Sí"), maybe: L("Maybe", "Tal vez"), no: L("No", "No"),
+  waitT: L("Waiting for {p}", "Esperando a {p}"),
+  waitB: L("You’re done. Your results will appear here as soon as {p} finishes.", "Ya terminaste. Sus resultados aparecerán aquí en cuanto {p} termine."),
+  redo: L("Change my answers", "Cambiar mis respuestas"),
+  redoQ: L("This reopens your answers, and {p} will see “waiting” until you finish again.", "Esto reabre tus respuestas, y {p} verá “esperando” hasta que termines otra vez."),
+  reopen: L("Reopen my answers", "Reabrir mis respuestas"), cancel: L("Cancel", "Cancelar"),
+  you: L("you", "tú"),
+  rKicker: L("Your results", "Sus resultados"),
+  sync: L("in sync", "en sintonía"),
+  youKnow: L("you know {p}", "conoces a {p}"), knowsYou: L("{p} knows you", "{p} te conoce"),
+  hNow: L("Right now", "Ahora mismo"),
+  hNowSub: L("Where each of you is this week.", "Dónde está cada uno esta semana."),
+  carrying: L("{p} is carrying a lot right now. This week, lead with what {p} asked for: {help}.", "{p} está cargando bastante ahora mismo. Esta semana, empieza por lo que pidió: {help}."),
+  selfCare: L("You’re carrying a lot too. Tell {p} what you need instead of waiting to be asked.", "Tú también estás cargando bastante. Dile a {p} lo que necesitas en vez de esperar a que te pregunte."),
+  support: L("If it’s felt heavy for a while, it can also help to talk to a friend, family, or someone trained to listen.", "Si viene sintiéndose pesado desde hace tiempo, también puede ayudar hablar con una amistad, la familia o alguien preparado para escuchar."),
+  hConn: L("Where you’re connected", "Donde están conectados"),
+  hConnSub: L("Answers that line up, and things you both rated highly.", "Respuestas que coinciden y cosas que los dos valoraron alto."),
+  connNone: L("Not many overlaps this time, which just means more to learn about each other.", "No coinciden mucho esta vez; solo significa que hay más por descubrir del otro."),
+  bothHigh: L("You both rate this highly", "Los dos lo valoran alto"),
+  bothSaid: L("You both said", "Los dos dijeron"),
+  hWork: L("Worth working on", "Para trabajar juntos"),
+  hWorkSub: L("Low ratings and places where you see things differently, each with one thing to try.", "Puntajes bajos y temas donde lo ven distinto, cada uno con algo para probar."),
+  workNone: L("Nothing big flagged here. Keep doing what you’re doing.", "Nada importante por aquí. Sigan así."),
+  inWayTip: L("You both named these. Pick one and try a small fix this week, together.", "Los dos nombraron esto. Elijan uno y prueben una pequeña solución esta semana, juntos."),
+  tryL: L("Try", "Prueben"),
+  genericGap: L("You see this differently. Ask each other why you answered the way you did.", "Lo ven distinto. Pregúntense por qué respondió cada uno así."),
+  hWired: L("How you’re wired", "Cómo es cada uno"),
+  hWiredSub: L("Not right or wrong, just useful to know.", "No hay respuestas buenas o malas; solo es útil saberlo."),
+  same: L("Same", "Igual"), close: L("Close", "Cerca"),
+  hLove: L("How to love each other", "Cómo quererse mejor"),
+  needsT: L("What {p} needs from you", "Lo que {p} necesita de ti"),
+  lovesYou: L("What {p} loves that you do", "Lo que a {p} le encanta que hagas"),
+  wishes: L("What {p} wishes you did more", "Lo que {p} quisiera que hicieras más"),
+  told: L("What you told {p}", "Lo que tú le dijiste a {p}"),
+  youLove: L("What you love that {p} does", "Lo que te encanta que haga {p}"),
+  youWish: L("What you wish {p} did more", "Lo que quisieras que {p} hiciera más"),
+  hDesire: L("Desire", "Deseo"),
+  hDesireSub: L("The list below only shows what you both marked yes or maybe.", "La lista de abajo solo muestra lo que los dos marcaron con sí o tal vez."),
+  bothWant: L("You both want", "Los dos quieren"),
+  explore: L("Worth exploring together", "Para explorar juntos"),
+  noneMutual: L("No overlap in the list yet. That’s fine; it’s a starting point for a conversation.", "Todavía no coinciden en la lista. Está bien; es un punto de partida para conversar."),
+  desiredP: L("What makes {p} feel desired", "Lo que hace que {p} se sienta desead[a|o]"),
+  desiredMe: L("What makes you feel desired", "Lo que hace que te sientas desead[o|a]"),
+  inWords: L("In their words", "En sus palabras"),
+  hKnow: L("How well you know each other", "Qué tan bien se conocen"),
+  youOn: L("You, guessing {p}", "Tú, adivinando a {p}"),
+  pOn: L("{p}, guessing you", "{p}, adivinándote a ti"),
+  guessed: L("guessed", "dijo"), actual: L("actually", "en realidad"),
+  youGuessed: L("You guessed", "Dijiste"), pGuessed: L("{p} guessed", "{p} dijo"),
+  spot: L("Spot on", "Exacto"), part: L("Partly", "En parte"), miss: L("Not quite", "No esta vez"),
+  hFuture: L("The future", "El futuro"),
+  hWords: L("In your own words", "Con sus propias palabras"),
+  letterT: L("A note from {p}", "Una nota de {p}"),
+  yourNote: L("Your note to {p}", "Tu nota para {p}"),
+  againT: L("Answers can change anytime. Come back in a few weeks and see what’s moved.", "Las respuestas se pueden cambiar cuando quieran. Vuelvan en unas semanas y vean qué cambió."),
+  hDeep: L("A deeper read", "Una lectura más profunda"),
+  deepNote: L("Claude reads both sets of answers and writes a short read of you two. Desire answers are included only where you overlap, and your notes stay out. It uses your Claude account; once written, you both see it here.", "Claude lee las respuestas de los dos y escribe una lectura breve sobre ustedes. Del deseo solo se incluye lo que coincide, y sus notas quedan fuera. Usa tu cuenta de Claude; una vez escrita, los dos la verán aquí."),
+  deepBtn: L("Write our deeper read", "Escribir nuestra lectura"),
+  deepAgain: L("Write it again with the new answers", "Escribirla de nuevo con las respuestas nuevas"),
+  deepBusy: L("Reading both of your answers…", "Leyendo las respuestas de los dos…"),
+  deepStale: L("Written before someone changed their answers.", "Escrita antes de que alguien cambiara sus respuestas."),
+  deepErr: L("Couldn’t write it this time. Try again in a little while.", "No se pudo escribir esta vez. Inténtalo de nuevo en un rato."),
+  deepBusyErr: L("Claude is at its limit for you right now. Try again later.", "Claude está al límite para ti ahora mismo. Inténtalo más tarde."),
+  strong: L("What’s strong", "Lo fuerte"), grow: L("Where to grow", "Dónde crecer"), week: L("This week", "Esta semana")
+};
+
+/* ---------- state ---------- */
+const S = {
+  slot: null, room: null, lang: "en", store: null,
+  docs: { a: null, b: null }, got: { a: false, b: false }, ready: false,
+  answers: {}, pos: 0, done: false, touched: false,
+  readOnly: false, view: "loading", saveState: "", redoConfirm: false,
+  lastPartner: "", lastMine: "", copied: ""
+};
+
+/* ---------- storage (per-device conveniences only) ---------- */
+function lsGet(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v){ try { localStorage.setItem(k, v); } catch (e) {} }
+
+/* ---------- text ---------- */
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])); }
+function fill(str, speaker, vars){
+  const sp = speaker || S.slot || "a";
+  let out = String(str)
+    .replace(/\[([^|\]]*)\|([^\]]*)\]/g, (m, x, y) => (sp === "a" ? x : y))
+    .replace(/\{p\}/g, NAMES[other(sp)])
+    .replace(/\{me\}/g, NAMES[sp]);
+  if (vars) for (const k in vars) out = out.split("{" + k + "}").join(vars[k]);
+  return out;
+}
+function tx(obj, speaker, lang){ if (!obj) return ""; const l = lang || S.lang; return fill(obj[l] != null ? obj[l] : obj.en, speaker); }
+function tr(key, vars, speaker){ const o = U[key]; if (!o) return key; return fill(o[S.lang] != null ? o[S.lang] : o.en, speaker || S.slot, vars); }
+
+/* ---------- answers ---------- */
+function getAns(slot, id){
+  if (slot === S.slot) return S.answers[id];
+  const d = S.docs[slot]; return d && d.answers ? d.answers[id] : undefined;
+}
+function isAnswered(q, src){
+  const v = (src || S.answers)[q.id];
+  if (v === undefined || v === null) return false;
+  if (q.type === "text") return q.optional ? true : String(v).trim().length > 0;
+  if (q.type === "multi") return Array.isArray(v) && v.length > 0;
+  if (q.type === "ynm") return YNM.every(it => v[it.k]);
+  return true;
+}
+function answeredCount(){ return ALLQ.filter(q => isAnswered(q)).length; }
+function optLabel(q, k, speaker, lang){
+  if (q.persp) {
+    const n = norm(speaker, k);
+    if (n === "a" || n === "b") return NAMES[n];
+  }
+  const o = (q.opts || []).find(x => x.k === k);
+  return o ? tx(o, speaker, lang) : "";
+}
+function norm(slot, k){ return k === "self" ? slot : k === "partner" ? other(slot) : k; }
+
+/* ---------- links ---------- */
+function parseHash(){
+  let h = location.hash.replace(/^#/, "");
+  try { h = decodeURIComponent(h); } catch (e) {}
+  const m = h.match(/^([A-Za-z0-9_-]{16,64})\.(a|b)$/);
+  return m ? { room: m[1], slot: m[2] } : null;
+}
+function newRoom(){
+  const b = new Uint8Array(16); crypto.getRandomValues(b);
+  return btoa(String.fromCharCode.apply(null, b)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function linkFor(room, slot){ return location.origin + location.pathname + "#" + room + "." + slot; }
+window.addEventListener("hashchange", () => location.reload());
+
+/* ---------- Firebase ---------- */
+async function connect(){
+  const base = "https://www.gstatic.com/firebasejs/" + FIREBASE_VERSION + "/";
+  const appMod = await import(base + "firebase-app.js");
+  const fsMod = await import(base + "firebase-firestore.js");
+  const fdb = fsMod.getFirestore(appMod.initializeApp(FIREBASE_CONFIG));
+  return {
+    watch: (path, next, err) => fsMod.onSnapshot(fsMod.doc(fdb, path), s => next(s.exists() ? s.data() : null), err),
+    set: (path, data) => fsMod.setDoc(fsMod.doc(fdb, path), data)
+  };
+}
+function docPath(slot){ return "rooms/" + S.room + "/answers/" + slot; }
+
+async function init(){
+  const h = parseHash();
+  const l = lsGet("mc_lang");
+  S.lang = (l === "en" || l === "es") ? l
+    : (h && h.slot === "b") ? "es"
+    : (h && h.slot === "a") ? "en"
+    : ((navigator.language || "").toLowerCase().indexOf("es") === 0 ? "es" : "en");
+  document.documentElement.lang = S.lang;
+  renderTop(); render();
+  setInterval(updateClocks, 20000);
+  if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.indexOf("PASTE") === 0) { S.view = "config"; render(); return; }
+  if (!h) { S.room = lsGet("mc_room"); S.view = "setup"; render(); return; }
+  S.room = h.room; S.slot = h.slot;
+  if (h.slot === "a") lsSet("mc_room", h.room);
+  document.body.dataset.slot = S.slot;
+  renderTop(); render();
+  try { S.store = await connect(); }
+  catch (e) { S.view = "error"; render(); return; }
+  ["a", "b"].forEach(slot => S.store.watch(docPath(slot), data => onDoc(slot, data), () => { S.view = "error"; render(); }));
+}
+
+function onDoc(slot, data){
+  S.docs[slot] = data || null; S.got[slot] = true;
+  if (!S.got.a || !S.got.b) return;
+  const firstLoad = !S.ready; S.ready = true;
+  const d = S.docs;
+  let mineChanged = false;
+  if (!S.touched) {
+    const m = d[S.slot];
+    const mj = JSON.stringify(m || null);
+    if (mj !== S.lastMine) { mineChanged = true; S.lastMine = mj; }
+    if (m) { S.answers = JSON.parse(JSON.stringify(m.answers || {})); S.pos = Math.min(m.pos || 0, FLOW.length - 1); S.done = !!m.done; }
+  }
+  const pj = JSON.stringify(d[other(S.slot)] || null);
+  const partnerChanged = pj !== S.lastPartner; S.lastPartner = pj;
+  if (S.view === "quiz") return;
+  const v = decideView();
+  if (firstLoad || v !== S.view || partnerChanged || mineChanged) { S.view = v; render(); }
+}
+
+function decideView(){
+  const p = S.docs[other(S.slot)];
+  if (S.done && p && p.done) return "results";
+  if (S.done) return "waiting";
+  return "welcome";
+}
+
+/* ---------- saving: one write at a time ---------- */
+let saving = false, saveAgain = false;
+async function save(){
+  if (!S.store || !S.slot) return;
+  if (saving) { saveAgain = true; return; }
+  saving = true; setSaveState("saving");
+  try {
+    await S.store.set(docPath(S.slot), {
+      answers: S.answers, pos: S.pos, done: S.done,
+      count: answeredCount(), total: QCOUNT, lang: S.lang,
+      updatedAt: new Date().toISOString()
+    });
+    setSaveState("saved");
+  } catch (e) {
+    setSaveState("fail");
+  } finally {
+    saving = false;
+    if (saveAgain) { saveAgain = false; save(); }
+  }
+}
+function setSaveState(s){
+  S.saveState = s;
+  const el = document.getElementById("savestate");
+  if (el) { el.textContent = s ? tr(s === "fail" ? "saveFail" : s) : ""; el.className = "savestate" + (s === "fail" ? " fail" : ""); }
+}
+
+/* ---------- sharing links ---------- */
+async function copyLink(slot){
+  const url = linkFor(S.room, slot);
+  let ok = false;
+  try { await navigator.clipboard.writeText(url); ok = true; } catch (e) {}
+  if (!ok) { const i = document.getElementById("link_" + slot); if (i) { i.focus(); i.select(); try { document.execCommand("copy"); } catch (e) {} } }
+  S.copied = slot; render();
+  setTimeout(() => { S.copied = ""; if (["setup","welcome","waiting"].includes(S.view)) render(); }, 1800);
+}
+function shareLink(slot){
+  const url = linkFor(S.room, slot);
+  const text = slot === "b" ? U.shareA.es : U.shareA.en;
+  if (navigator.share) navigator.share({ title: "Más Cerca", text, url }).catch(() => {});
+  else copyLink(slot);
+}
+function linkBox(slot, label){
+  const url = linkFor(S.room, slot);
+  return `<div class="linkbox"><span class="who ${slot}">${esc(label || tr("linkFor", { name: NAMES[slot] }))}</span>
+    <input class="linkin" id="link_${slot}" readonly value="${esc(url)}" aria-label="${esc(tr("linkFor", { name: NAMES[slot] }))}">
+    <div class="row"><button class="btn ghost" data-act="copy" data-slot="${slot}">${esc(S.copied === slot ? tr("copied") : tr("copy"))}</button>${navigator.share ? `<button class="btn ghost" data-act="share" data-slot="${slot}">${esc(tr("share"))}</button>` : ""}</div></div>`;
+}
+function sendBlock(){ return S.slot === "a" ? linkBox("b", tr("sendHer")) : ""; }
+
+/* ---------- header ---------- */
+function timeIn(tz){
+  try { return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz }).format(new Date()); }
+  catch (e) { return "--:--"; }
+}
+function renderTop(){
+  const top = document.getElementById("top");
+  top.innerHTML =
+    `<div class="clocks" aria-label="Abu Dhabi and Lima local times">
+       <div class="clock a"><span class="city">${esc(tr("ad"))}</span><span class="t" id="tA">${timeIn("Asia/Dubai")}</span></div>
+       <div class="span">${esc(tr("apart"))}</div>
+       <div class="clock b"><span class="city">${esc(tr("lima"))}</span><span class="t" id="tB">${timeIn("America/Lima")}</span></div>
+     </div>
+     <div class="lang" role="group" aria-label="Language">
+       <button data-lang="en" aria-pressed="${S.lang === "en"}">EN</button>
+       <button data-lang="es" aria-pressed="${S.lang === "es"}">ES</button>
+     </div>`;
+}
+function updateClocks(){
+  const a = document.getElementById("tA"), b = document.getElementById("tB");
+  if (a) a.textContent = timeIn("Asia/Dubai");
+  if (b) b.textContent = timeIn("America/Lima");
+}
+document.getElementById("top").addEventListener("click", e => {
+  const b = e.target.closest("[data-lang]"); if (!b) return;
+  S.lang = b.dataset.lang; lsSet("mc_lang", S.lang);
+  document.documentElement.lang = S.lang;
+  renderTop(); render();
+});
+
+/* ---------- views ---------- */
+const app = document.getElementById("app");
+
+function render(){
+  const v = S.view; let h = "";
+  if (v === "loading") h = vMsg(tr("loading"), "");
+  else if (v === "config") h = vMsg(tr("cfgT"), tr("cfgB"));
+  else if (v === "error") h = vMsg(tr("errT"), tr("errB"));
+  else if (v === "setup") h = vSetup();
+  else if (v === "welcome") h = vWelcome();
+  else if (v === "quiz") h = vQuiz();
+  else if (v === "waiting") h = vWaiting();
+  else if (v === "results") h = vResults();
+  app.innerHTML = h;
+}
+
+function vSetup(){
+  const body = !S.room
+    ? `<button class="btn wide" data-act="create">${esc(tr("create"))}</button>`
+    : `${linkBox("a")}${linkBox("b")}<a class="btn wide" href="${esc(linkFor(S.room, "a"))}">${esc(tr("openMine"))}</a>`;
+  return `<section class="screen hero">
+    <div class="orbs" aria-hidden="true"><span class="orb a"></span><span class="orb b" style="left:calc(100% - 72px)"></span></div>
+    <span class="eyebrow">Más Cerca · ${esc(NAMES.a)} &amp; ${esc(NAMES.b)}</span>
+    <h1 style="font-size:clamp(38px,11vw,52px)">${esc(tr("setT"))}</h1>
+    <p class="lead">${esc(tr("setB"))}</p>
+    ${body}
+    <p class="muted small">${esc(tr("setNote"))}</p>
+  </section>`;
+}
+
+function vMsg(title, body){
+  return `<section class="screen hero">
+    <div class="orbs" aria-hidden="true"><span class="orb a"></span><span class="orb b" style="left:calc(100% - 72px)"></span></div>
+    <h1 style="font-size:clamp(34px,10vw,46px)">${esc(title)}</h1>
+    ${body ? `<p class="lead">${esc(body)}</p>` : ""}
+  </section>`;
+}
+
+function partnerLine(){
+  const P = other(S.slot), d = S.docs[P];
+  let txt, w = 0;
+  if (!d || !d.count) txt = tr("pNot");
+  else if (d.done) { txt = tr("pDone"); w = 1; }
+  else { txt = tr("pProg", { n: d.count, t: d.total || QCOUNT }); w = d.count / (d.total || QCOUNT); }
+  return { txt, w };
+}
+
+function roBanner(){ return S.readOnly ? `<div class="banner">${esc(tr("ro"))}</div>` : ""; }
+
+function vWelcome(){
+  const n = answeredCount();
+  const pl = partnerLine();
+  const P = other(S.slot);
+  return `<section class="screen hero">
+    <div class="orbs" aria-hidden="true"><span class="orb a"></span><span class="orb b" style="left:calc(100% - 72px)"></span></div>
+    <span class="eyebrow">${esc(tr("kicker"))} · ${esc(NAMES.a)} &amp; ${esc(NAMES.b)}</span>
+    <h1>Más <em>cerca</em></h1>
+    <p class="lead"><strong>${esc(tr("hi"))}</strong> ${esc(tr("lead"))}</p>
+    <ul class="facts">
+      <li>${esc(tr("f1"))}</li><li>${esc(tr("f2"))}</li><li>${esc(tr("f3"))}</li><li>${esc(tr("f4"))}</li>
+    </ul>
+    ${sendBlock()}
+    <div class="status ${P}"><span class="pip"></span><span>${esc(pl.txt)}</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn wide" data-act="start">${esc(n > 0 ? tr("resume") : tr("start"))}</button>
+      ${n > 0 ? `<span class="muted small" style="text-align:center">${esc(tr("resumeAt", { n, t: QCOUNT }))}</span>` : ""}
+    </div>
+  </section>`;
+}
+
+function secProgress(si){
+  const qs = SECTIONS[si].qs; let done = 0;
+  qs.forEach(q => { if (isAnswered(q)) done++; });
+  return done / qs.length;
+}
+
+function vQuiz(){
+  const f = FLOW[S.pos];
+  const sec = SECTIONS[f.si];
+  const segs = SECTIONS.map((s, i) => `<span class="seg"><i style="width:${Math.round(secProgress(i) * 100)}%"></i></span>`).join("");
+  const head = `<div class="qtop">
+      ${S.pos > 0 ? `<button class="btn text" data-act="back">← ${esc(tr("back"))}</button>` : `<button class="btn text" data-act="home">← ${esc(tr("back"))}</button>`}
+      <span class="savestate${S.saveState === "fail" ? " fail" : ""}" id="savestate">${S.saveState ? esc(tr(S.saveState === "fail" ? "saveFail" : S.saveState)) : ""}</span>
+    </div>
+    <div class="progress" aria-hidden="true">${segs}</div>`;
+  if (f.kind === "intro") {
+    const n = sec.qs.length;
+    return `<section class="screen">${head}
+      <div class="intro" style="display:flex;flex-direction:column;gap:16px;padding-top:8px">
+        <span class="eyebrow">${f.si + 1} / ${SECTIONS.length} · ${esc(n === 1 ? tr("q1") : tr("qs", { n }))}</span>
+        <h2>${esc(tx(sec.title))}</h2>
+        <p>${esc(tx(sec.intro))}</p>
+      </div>
+      ${roBanner()}
+      <div class="nav"><button class="btn" data-act="next">${esc(tr("go"))} →</button></div>
+    </section>`;
+  }
+  const q = f.q;
+  const idx = sec.qs.indexOf(q) + 1;
+  const isLast = S.pos === FLOW.length - 1;
+  const v = S.answers[q.id];
+  let body = "", needsNext = true;
+
+  if (q.type === "scale") {
+    body = `<div class="scale" role="group">${[1,2,3,4,5].map(n => `<button class="sc" data-act="scale" data-v="${n}" aria-pressed="${v === n}">${n}</button>`).join("")}</div>
+      <div class="ends"><span>1 · ${esc(tx(q.lo))}</span><span>${esc(tx(q.hi))} · 5</span></div>`;
+  } else if (q.type === "single") {
+    body = `<div class="opts" role="group">${q.opts.map(o => `<button class="opt" data-act="pick" data-k="${o.k}" aria-pressed="${v === o.k}">${esc(tx(o))}</button>`).join("")}</div>`;
+  } else if (q.type === "multi") {
+    const arr = Array.isArray(v) ? v : [];
+    body = `<div class="opts" role="group">${q.opts.map(o => `<button class="opt sq" data-act="toggle" data-k="${o.k}" aria-pressed="${arr.includes(o.k)}">${esc(tx(o))}</button>`).join("")}</div>`;
+  } else if (q.type === "text") {
+    body = `${q.optional ? `<span class="counter">${esc(tr("optional"))}</span>` : ""}
+      <textarea id="ta_${q.id}" data-q="${q.id}" placeholder="${esc(tr("place"))}" maxlength="2000">${esc(v || "")}</textarea>`;
+  } else if (q.type === "ynm") {
+    const obj = v || {};
+    body = `<div class="ynm">${YNM.map(it => `<div class="ynm-row"><span class="lbl">${esc(tx(it))}</span>
+      <div class="seg3" role="group">
+        <button data-act="ynm" data-i="${it.k}" data-v="y" aria-pressed="${obj[it.k] === "y"}">${esc(tr("yes"))}</button>
+        <button data-act="ynm" data-i="${it.k}" data-v="m" aria-pressed="${obj[it.k] === "m"}">${esc(tr("maybe"))}</button>
+        <button data-act="ynm" data-i="${it.k}" data-v="n" aria-pressed="${obj[it.k] === "n"}">${esc(tr("no"))}</button>
+      </div></div>`).join("")}</div>`;
+  }
+
+  let counter = "";
+  if (q.type === "multi") counter = `<span class="counter" id="cnt">${esc(tr("chosen", { n: (Array.isArray(v) ? v.length : 0), max: q.max }))}</span>`;
+  if (q.type === "ynm") counter = `<span class="counter" id="cnt">${Object.keys(v || {}).length} / ${YNM.length}</span>`;
+  const skipBtn = (q.type === "text" && q.optional) ? `<button class="btn ghost" data-act="skip">${esc(tr("skip"))}</button>` : "";
+  let canNext;
+  if (q.type === "text") canNext = q.optional ? true : String(v || "").trim().length > 0;
+  else canNext = isAnswered(q);
+  const nav = needsNext ? `<div class="nav">${counter}<span class="spacer"></span>${skipBtn}
+      <button class="btn" id="nextBtn" data-act="next" ${canNext ? "" : "disabled"}>${esc(isLast ? tr("finish") : tr("next"))} →</button></div>` : "";
+
+  return `<section class="screen">${head}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <span class="eyebrow">${esc(tx(sec.title))} · ${idx}/${sec.qs.length}</span>
+      <h2 class="qtext">${esc(tx(q.q))}</h2>
+    </div>
+    ${roBanner()}
+    ${body}
+    ${nav}
+  </section>`;
+}
+
+function vWaiting(){
+  const P = other(S.slot);
+  const pl = partnerLine();
+  return `<section class="screen hero wait">
+    <div class="orbs" aria-hidden="true"><span class="orb a"></span><span class="orb b" style="left:calc(100% - 72px)"></span></div>
+    <h1 style="font-size:clamp(40px,12vw,56px)">${esc(tr("waitT"))}</h1>
+    <p class="lead">${esc(tr("waitB"))}</p>
+    <div class="status ${P}" style="flex-direction:column;align-items:stretch;gap:10px">
+      <div style="display:flex;gap:10px;align-items:center"><span class="pip"></span><span>${esc(pl.txt)}</span></div>
+      <div class="bar" style="--pc:var(--${P === "a" ? "gold" : "teal"})"><i style="width:${Math.round(pl.w * 100)}%"></i></div>
+    </div>
+    ${pl.w < 1 ? sendBlock() : ""}
+    ${redoBlock()}
+  </section>`;
+}
+
+function redoBlock(){
+  if (S.readOnly) return "";
+  if (!S.redoConfirm) return `<div><button class="btn ghost" data-act="redo">${esc(tr("redo"))}</button></div>`;
+  return `<div class="confirm"><p class="small">${esc(tr("redoQ"))}</p>
+    <div class="row"><button class="btn" data-act="redoYes">${esc(tr("reopen"))}</button><button class="btn ghost" data-act="redoNo">${esc(tr("cancel"))}</button></div></div>`;
+}
+
+/* ---------- results helpers ---------- */
+function inSync(q){
+  const V = S.slot, P = other(V);
+  const a = getAns(V, q.id), b = getAns(P, q.id);
+  if (a == null || b == null || a === "" || b === "") return null;
+  if (q.type === "scale") return Math.abs(a - b) <= 1;
+  if (q.type === "single") {
+    if (q.persp) return norm(V, a) === norm(P, b);
+    if (a === b) return true;
+    if (q.ord) { const i = q.ord.indexOf(a), j = q.ord.indexOf(b); if (i >= 0 && j >= 0) return Math.abs(i - j) <= 1; }
+    return false;
+  }
+  if (q.type === "multi") return Array.isArray(a) && Array.isArray(b) && a.some(x => b.includes(x));
+  return null;
+}
+function strip(q){
+  const V = S.slot, P = other(V);
+  const a = getAns(V, q.id), b = getAns(P, q.id);
+  const x = v => ((v - 1) / 4).toFixed(3);
+  let ticks = ""; for (let i = 1; i <= 5; i++) ticks += `<span class="tick" style="--x:${x(i)}"></span>`;
+  let dots = "";
+  if (a != null && b != null && a === b) dots = `<span class="dot ab" style="--x:${x(a)}" title="${esc(NAMES.a)} & ${esc(NAMES.b)}: ${a}"></span>`;
+  else {
+    if (b != null) dots += `<span class="dot ${P}" style="--x:${x(b)}" title="${esc(NAMES[P])}: ${b}"></span>`;
+    if (a != null) dots += `<span class="dot ${V}" style="--x:${x(a)}" title="${esc(NAMES[V])}: ${a}"></span>`;
+  }
+  return `<div class="strip"><div class="track">${ticks}${dots}</div>
+    <div class="ends"><span>${esc(tx(q.lo, V))}</span><span>${esc(tx(q.hi, V))}</span></div></div>`;
+}
+function whoTag(slot){ return `<span class="who ${slot}">${esc(NAMES[slot])}${slot === S.slot ? ` <span class="me">(${esc(tr("you"))})</span>` : ""}</span>`; }
+function chipsFor(q, slot, keys, cls){
+  return `<div class="chips">${(keys || []).map(k => `<span class="chip ${cls || slot}">${esc(optLabel(q, k, slot))}</span>`).join("")}</div>`;
+}
+function valFor(q, slot){
+  const v = getAns(slot, q.id);
+  if (v == null || v === "") return `<span class="muted">—</span>`;
+  if (q.type === "multi") return chipsFor(q, slot, v);
+  if (q.type === "scale") return `${v} / 5`;
+  return esc(optLabel(q, v, slot));
+}
+function lines(q){
+  const V = S.slot, P = other(V);
+  return `<div class="lines">
+    <div class="line">${whoTag(V)}<span class="val">${valFor(q, V)}</span></div>
+    <div class="line">${whoTag(P)}<span class="val">${valFor(q, P)}</span></div></div>`;
+}
+function quote(slot, text, caption){
+  if (!text || !String(text).trim()) return "";
+  return `<figure class="quote ${slot}"><figcaption>${caption ? esc(caption) : esc(NAMES[slot])}</figcaption><blockquote>${esc(text)}</blockquote></figure>`;
+}
+function pips(slot, v){ let h = ""; for (let i = 1; i <= 5; i++) h += `<i class="${v >= i ? "on" : ""}"></i>`; return `<div class="pips ${slot}">${h}</div>`; }
+
+function knowScore(guesser){
+  const target = other(guesser); let score = 0, total = 0; const rows = [];
+  ALLQ.filter(q => q.guess).forEach(q => {
+    const g = getAns(guesser, q.id), act = getAns(target, q.guess);
+    if (g == null || act == null) return;
+    total++;
+    let mark = "miss";
+    if (q.type === "multi") {
+      const ga = g || [], aa = act || [];
+      const ov = ga.filter(x => aa.includes(x)).length;
+      if (ov === aa.length && ov === ga.length) { mark = "spot"; score += 1; }
+      else if (ov > 0) { mark = "part"; score += 0.5; }
+    } else if (g === act) { mark = "spot"; score += 1; }
+    rows.push({ q, g, act, mark });
+  });
+  return { score, total, rows };
+}
+function fmtScore(n){ const w = Math.floor(n); return (n - w) >= 0.5 ? (w ? w + "½" : "½") : String(w); }
+
+function mutualDesire(){
+  const a = getAns("a", "d_ynm") || {}, b = getAns("b", "d_ynm") || {};
+  const both = [], explore = [];
+  YNM.forEach(it => {
+    const x = a[it.k], y = b[it.k];
+    if (!x || !y || x === "n" || y === "n") return;
+    if (x === "y" && y === "y") both.push(it); else explore.push(it);
+  });
+  return { both, explore };
+}
+
+/* ---------- results view ---------- */
+function vResults(){
+  const V = S.slot, P = other(V);
+  const comparable = ALLQ.filter(q => (q.cat === "trait" || q.cat === "pref" || q.cat === "rating") && q.type !== "text");
+  let sN = 0, sT = 0; comparable.forEach(q => { const r = inSync(q); if (r !== null) { sT++; if (r) sN++; } });
+  const kV = knowScore(V), kP = knowScore(P);
+  const ratio = sT ? sN / sT : 0;
+  const orbGap = Math.round(72 * (1 - ratio * 0.7));
+
+  /* hero */
+  let h = `<section class="screen rhero">
+    <span class="eyebrow">${esc(tr("rKicker"))}</span>
+    <h1><span class="n a">${esc(NAMES.a)}</span> <span class="amp">&amp;</span> <span class="n b">${esc(NAMES.b)}</span></h1>
+    <div class="orbs" aria-hidden="true" style="height:84px"><span class="orb a"></span><span class="orb b" style="left:${orbGap}px"></span></div>
+    <div class="stats">
+      <div class="stat"><span class="v">${sN}<small> / ${sT}</small></span><span class="k">${esc(tr("sync"))}</span></div>
+      <div class="stat"><span class="v">${fmtScore(kV.score)}<small> / ${kV.total}</small></span><span class="k">${esc(tr("youKnow"))}</span></div>
+      <div class="stat"><span class="v">${fmtScore(kP.score)}<small> / ${kP.total}</small></span><span class="k">${esc(tr("knowsYou"))}</span></div>
+    </div>
+    <div class="legend">${whoTag(V)}${whoTag(P)}</div>
+  </section>`;
+
+  /* right now */
+  const mood = ["m_mood","m_stress","m_energy","m_loved","m_close"].map(id => QMAP[id]);
+  const card = slot => `<div class="card">${whoTag(slot)}
+      ${mood.map(q => `<div class="meter"><span class="k">${esc(tx(q.short, slot))} · ${getAns(slot, q.id) || "–"}/5</span>${pips(slot, getAns(slot, q.id) || 0)}</div>`).join("")}
+      <div class="meter"><span class="k">${esc(tx(QMAP.m_drain.short, slot))}</span>${chipsFor(QMAP.m_drain, slot, getAns(slot, "m_drain"))}</div>
+      <div class="meter"><span class="k">${esc(tx(QMAP.m_help.short, slot))}</span><span>${esc(optLabel(QMAP.m_help, getAns(slot, "m_help"), slot))}</span></div>
+    </div>`;
+  const pm = getAns(P, "m_mood"), ps = getAns(P, "m_stress"), vm = getAns(V, "m_mood"), vs = getAns(V, "m_stress");
+  let notes = "";
+  if (pm <= 2 || ps >= 4) notes += `<p>${esc(tr("carrying", { help: optLabel(QMAP.m_help, getAns(P, "m_help"), P).toLowerCase() }))}</p>`;
+  if (vm <= 2 || vs >= 4) notes += `<p>${esc(tr("selfCare"))}</p>`;
+  if ((pm <= 2 && ps >= 4) || (vm <= 2 && vs >= 4)) notes += `<p>${esc(tr("support"))}</p>`;
+  h += `<section class="rs"><h2>${esc(tr("hNow"))}</h2><p class="sub">${esc(tr("hNowSub"))}</p>
+    <div class="pair">${card(V)}${card(P)}</div>
+    ${notes ? `<div class="note">${notes}</div>` : ""}</section>`;
+
+  /* connected + work on */
+  const conn = [], work = [];
+  ALLQ.forEach(q => {
+    if (q.cat !== "rating" && q.cat !== "pref") return;
+    const r = inSync(q); if (r === null) return;
+    const a = getAns(V, q.id), b = getAns(P, q.id);
+    const show = q.type === "scale" ? strip(q) : lines(q);
+    if (q.cat === "rating") {
+      const low = a <= 2 || b <= 2;
+      if (low) work.push({ q, show, tip: (q.tip && (q.tip.low || q.tip.gap)) || U.genericGap, w: 0 });
+      else if (!r) work.push({ q, show, tip: (q.tip && (q.tip.gap || q.tip.low)) || U.genericGap, w: 1 });
+      else if (a >= 4 && b >= 4) conn.push({ q, show, label: tr("bothHigh") });
+    } else {
+      if (r) {
+        let body = show;
+        if (q.type === "multi") body = `<div class="lines"><div class="line"><span class="who" style="--pc:var(--rose)">${esc(tr("bothSaid"))}</span><span class="val">${chipsFor(q, V, a.filter(x => b.includes(x)), "both")}</span></div></div>`;
+        else if (q.type === "single" && (a === b || (q.persp && norm(V, a) === norm(P, b)))) body = `<div class="lines"><div class="line"><span class="who" style="--pc:var(--rose)">${esc(tr("bothSaid"))}</span><span class="val">${esc(optLabel(q, a, V))}</span></div></div>`;
+        conn.push({ q, show: body });
+      } else work.push({ q, show, tip: (q.tip && q.tip.gap) || U.genericGap, w: 2 });
+    }
+  });
+  const sa = getAns(V, "u_strength") || [], sb = getAns(P, "u_strength") || [];
+  const sharedStr = sa.filter(x => sb.includes(x));
+  if (sharedStr.length) conn.unshift({ q: QMAP.u_strength, show: chipsFor(QMAP.u_strength, V, sharedStr, "both"), label: tr("bothSaid") });
+  const da = getAns(V, "u_drain") || [], dbb = getAns(P, "u_drain") || [];
+  const sharedDrain = da.filter(x => dbb.includes(x) && x !== "none");
+  if (sharedDrain.length) work.push({ q: QMAP.u_drain, show: chipsFor(QMAP.u_drain, V, sharedDrain, "both"), tip: U.inWayTip, w: 1 });
+  work.sort((x, y) => x.w - y.w);
+
+  h += `<section class="rs"><h2>${esc(tr("hConn"))}</h2><p class="sub">${esc(tr("hConnSub"))}</p>
+    <div class="items">${conn.length ? conn.map(c => `<div class="item"><span class="t">${esc(tx(c.q.short, V))}${c.label ? ` <span class="pill ok">${esc(c.label)}</span>` : ""}</span>${c.show}</div>`).join("") : `<p class="muted">${esc(tr("connNone"))}</p>`}</div></section>`;
+
+  h += `<section class="rs"><h2>${esc(tr("hWork"))}</h2><p class="sub">${esc(tr("hWorkSub"))}</p>
+    <div class="items">${work.length ? work.map(c => `<div class="item"><span class="t">${esc(tx(c.q.short, V))}</span>${c.show}<p class="tip"><b>${esc(tr("tryL"))}</b><span>${esc(tx(c.tip, V))}</span></p></div>`).join("") : `<p class="muted">${esc(tr("workNone"))}</p>`}</div></section>`;
+
+  /* how you're wired */
+  const traits = ALLQ.filter(q => q.cat === "trait");
+  h += `<section class="rs"><h2>${esc(tr("hWired"))}</h2><p class="sub">${esc(tr("hWiredSub"))}</p>
+    <div class="items">${traits.map(q => {
+      const r = inSync(q);
+      const pill = r === true ? ` <span class="pill ok">${esc(q.type === "scale" && getAns(V, q.id) !== getAns(P, q.id) ? tr("close") : tr("same"))}</span>` : "";
+      return `<div class="item"><span class="t">${esc(tx(q.short, V))}${pill}</span>${q.type === "scale" ? strip(q) : lines(q)}</div>`;
+    }).join("")}</div></section>`;
+
+  /* how to love each other */
+  const needsRows = slot => `
+      <div class="item"><span class="t">${esc(tx(QMAP.p_love.short, slot))}</span>${chipsFor(QMAP.p_love, slot, getAns(slot, "p_love"))}</div>
+      <div class="item"><span class="t">${esc(tx(QMAP.h_more.short, slot))}</span>${chipsFor(QMAP.h_more, slot, getAns(slot, "h_more"))}</div>
+      <div class="item"><span class="t">${esc(tx(QMAP.h_support.short, slot))}</span><span>${esc(optLabel(QMAP.h_support, getAns(slot, "h_support"), slot))}</span></div>`;
+  h += `<section class="rs"><h2>${esc(tr("hLove"))}</h2>
+    <h3 class="eyebrow" style="color:var(--${P === "a" ? "gold" : "teal"})">${esc(tr("needsT"))}</h3>
+    <div class="items">${needsRows(P)}
+      ${quote(P, getAns(P, "h_love_most"), tr("lovesYou"))}
+      ${quote(P, getAns(P, "h_wish"), tr("wishes"))}
+    </div>
+    <details><summary>${esc(tr("told"))}</summary><div class="in">${needsRows(V)}
+      ${quote(V, getAns(V, "h_love_most"), tr("youLove"))}
+      ${quote(V, getAns(V, "h_wish"), tr("youWish"))}</div></details>
+  </section>`;
+
+  /* desire */
+  const md = mutualDesire();
+  h += `<section class="rs"><h2>${esc(tr("hDesire"))}</h2><p class="sub">${esc(tr("hDesireSub"))}</p>
+    <div class="items">
+      <div class="item"><span class="t">${esc(tx(QMAP.d_satisf.short, V))}</span>${strip(QMAP.d_satisf)}</div>
+      <div class="item"><span class="t">${esc(tx(QMAP.d_talk.short, V))}</span>${strip(QMAP.d_talk)}</div>
+      <div class="item"><span class="t">${esc(tx(QMAP.d_often.short, V))}</span>${lines(QMAP.d_often)}</div>
+      <div class="item"><span class="t">${esc(tx(QMAP.d_init.short, V))}</span>${lines(QMAP.d_init)}</div>
+      ${md.both.length || md.explore.length ? `
+        ${md.both.length ? `<div class="item"><span class="t">${esc(tr("bothWant"))}</span><div class="chips">${md.both.map(it => `<span class="chip both">${esc(tx(it, V))}</span>`).join("")}</div></div>` : ""}
+        ${md.explore.length ? `<div class="item"><span class="t">${esc(tr("explore"))}</span><div class="chips">${md.explore.map(it => `<span class="chip">${esc(tx(it, V))}</span>`).join("")}</div></div>` : ""}
+      ` : `<p class="muted">${esc(tr("noneMutual"))}</p>`}
+      <div class="item"><span class="t">${esc(tr("desiredP"))}</span>${chipsFor(QMAP.d_desired, P, getAns(P, "d_desired"))}</div>
+      <div class="item"><span class="t">${esc(tr("desiredMe"))}</span>${chipsFor(QMAP.d_desired, V, getAns(V, "d_desired"))}</div>
+      ${quote(P, getAns(P, "d_wish"))}${quote(V, getAns(V, "d_wish"))}
+    </div></section>`;
+
+  /* know each other */
+  const guessBlock = (k, guesser) => k.rows.map(r => {
+    const target = other(guesser);
+    const lbl = v => Array.isArray(v) ? v.map(x => optLabel(r.q, x, target)).join(", ") : optLabel(r.q, v, target);
+    const cls = r.mark === "spot" ? "ok" : r.mark === "part" ? "part" : "";
+    return `<div class="guess"><span class="t">${esc(tx(QMAP[r.q.guess].short, target))} <span class="pill ${cls}">${esc(tr(r.mark))}</span></span>
+      <span class="g">${esc(guesser === S.slot ? tr("youGuessed") : tr("pGuessed"))}: <b>${esc(lbl(r.g))}</b></span>
+      ${r.mark !== "spot" ? `<span class="g">${esc(tr("actual"))}: <b>${esc(lbl(r.act))}</b></span>` : ""}</div>`;
+  }).join("");
+  h += `<section class="rs"><h2>${esc(tr("hKnow"))}</h2>
+    <div class="card"><span class="eyebrow" style="color:var(--${V === "a" ? "gold" : "teal"})">${esc(tr("youOn"))} · ${fmtScore(kV.score)}/${kV.total}</span><div>${guessBlock(kV, V)}</div></div>
+    <div class="card"><span class="eyebrow" style="color:var(--${P === "a" ? "gold" : "teal"})">${esc(tr("pOn"))} · ${fmtScore(kP.score)}/${kP.total}</span><div>${guessBlock(kP, P)}</div></div>
+  </section>`;
+
+  /* future */
+  h += `<section class="rs"><h2>${esc(tr("hFuture"))}</h2><div class="items">
+    <div class="item"><span class="t">${esc(tx(QMAP.f_close.short, V))}</span>${strip(QMAP.f_close)}</div>
+    ${["f_when","f_where","f_visit"].map(id => `<div class="item"><span class="t">${esc(tx(QMAP[id].short, V))}</span>${lines(QMAP[id])}</div>`).join("")}
+    ${["f_year","f_soon"].map(id => {
+      const qa = quote(V, getAns(V, id)), qb = quote(P, getAns(P, id));
+      return qa || qb ? `<div class="item"><span class="t">${esc(tx(QMAP[id].short, V))}</span>${qb}${qa}</div>` : "";
+    }).join("")}
+  </div></section>`;
+
+  /* words */
+  const wordIds = ["p_proud","m_unsaid","h_hurt"];
+  const wordsHtml = wordIds.map(id => {
+    const qa = quote(V, getAns(V, id)), qb = quote(P, getAns(P, id));
+    return qa || qb ? `<div class="item"><span class="t">${esc(tx(QMAP[id].short, V))}</span>${qb}${qa}</div>` : "";
+  }).join("");
+  const pNote = getAns(P, "l_note"), vNote = getAns(V, "l_note");
+  h += `<section class="rs"><h2>${esc(tr("hWords"))}</h2><div class="items">${wordsHtml}</div>
+    ${pNote ? `<div class="letter"><span class="from">${esc(tr("letterT"))}</span><p>${esc(pNote)}</p></div>` : ""}
+    ${vNote ? `<details><summary>${esc(tr("yourNote"))}</summary><div class="in"><p style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(vNote)}</p></div></details>` : ""}
+  </section>`;
+
+  h += `<section class="foot"><p class="muted">${esc(tr("againT"))}</p>${redoBlock()}</section>`;
+  return h;
+}
+
+/* ---------- quiz navigation ---------- */
+function curQ(){ const f = FLOW[S.pos]; return f && f.kind === "q" ? f.q : null; }
+function go(pos){
+  S.pos = Math.max(0, Math.min(FLOW.length - 1, pos));
+  S.touched = true;
+  render(); window.scrollTo(0, 0);
+  save();
+}
+function next(){
+  const q = curQ();
+  if (q && q.type === "text" && q.optional && S.answers[q.id] === undefined) S.answers[q.id] = "";
+  if (q && !isAnswered(q)) return;
+  if (S.pos >= FLOW.length - 1) return finish();
+  go(S.pos + 1);
+}
+function finish(){
+  const open = FLOW.findIndex(f => f.kind === "q" && !isAnswered(f.q));
+  if (open >= 0) { go(open); return; }
+  S.done = true; S.touched = true; S.redoConfirm = false;
+  save();
+  S.view = decideView(); render(); window.scrollTo(0, 0);
+}
+function refreshControls(q){
+  const v = S.answers[q.id];
+  if (q.type === "multi") {
+    const arr = v || [];
+    app.querySelectorAll('[data-act="toggle"]').forEach(b => b.setAttribute("aria-pressed", String(arr.includes(b.dataset.k))));
+    const c = document.getElementById("cnt"); if (c) c.textContent = tr("chosen", { n: arr.length, max: q.max });
+  }
+  if (q.type === "ynm") {
+    const obj = v || {};
+    app.querySelectorAll('[data-act="ynm"]').forEach(b => b.setAttribute("aria-pressed", String(obj[b.dataset.i] === b.dataset.v)));
+    const c = document.getElementById("cnt"); if (c) c.textContent = Object.keys(obj).length + " / " + YNM.length;
+  }
+  const nb = document.getElementById("nextBtn");
+  if (nb && q.type !== "text") nb.disabled = !isAnswered(q);
+}
+
+let advanceTimer = null;
+app.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const act = el.dataset.act;
+  const q = curQ();
+  switch (act) {
+    case "create": S.room = newRoom(); lsSet("mc_room", S.room); render(); break;
+    case "copy": copyLink(el.dataset.slot); break;
+    case "share": shareLink(el.dataset.slot); break;
+    case "start":
+      S.view = "quiz"; S.touched = true;
+      if (S.pos >= FLOW.length - 1 && answeredCount() < QCOUNT) {
+        const firstOpen = FLOW.findIndex(f => f.kind === "q" && !isAnswered(f.q));
+        S.pos = firstOpen > 0 ? firstOpen : 0;
+      }
+      render(); window.scrollTo(0, 0); break;
+    case "home":
+      S.view = decideView(); render(); window.scrollTo(0, 0); break;
+    case "back": clearTimeout(advanceTimer); go(S.pos - 1); break;
+    case "next": clearTimeout(advanceTimer); next(); break;
+    case "skip": if (q) { S.answers[q.id] = ""; S.touched = true; } next(); break;
+    case "scale":
+    case "pick": {
+      if (!q) break;
+      S.answers[q.id] = act === "scale" ? Number(el.dataset.v) : el.dataset.k;
+      S.touched = true;
+      app.querySelectorAll(`[data-act="${act}"]`).forEach(b => b.setAttribute("aria-pressed", String(b === el)));
+      const nb = document.getElementById("nextBtn"); if (nb) nb.disabled = false;
+      const at = S.pos; clearTimeout(advanceTimer);
+      advanceTimer = setTimeout(() => { if (S.view === "quiz" && S.pos === at) next(); }, 300);
+      break;
+    }
+    case "toggle": {
+      if (!q) break;
+      const arr = Array.isArray(S.answers[q.id]) ? S.answers[q.id].slice() : [];
+      const k = el.dataset.k, i = arr.indexOf(k);
+      if (i >= 0) arr.splice(i, 1); else { if (arr.length >= q.max) arr.shift(); arr.push(k); }
+      S.answers[q.id] = arr; S.touched = true; refreshControls(q); break;
+    }
+    case "ynm": {
+      if (!q) break;
+      const obj = Object.assign({}, S.answers[q.id] || {});
+      obj[el.dataset.i] = el.dataset.v;
+      S.answers[q.id] = obj; S.touched = true; refreshControls(q); break;
+    }
+    case "redo": S.redoConfirm = true; render(); break;
+    case "redoNo": S.redoConfirm = false; render(); break;
+    case "redoYes":
+      S.done = false; S.redoConfirm = false; S.touched = true; S.pos = 0; save();
+      S.view = "quiz"; render(); window.scrollTo(0, 0); break;
+  }
+});
+app.addEventListener("input", e => {
+  const t = e.target;
+  if (t.matches && t.matches("textarea[data-q]")) {
+    const q = QMAP[t.dataset.q];
+    S.answers[q.id] = t.value; S.touched = true;
+    const nb = document.getElementById("nextBtn");
+    if (nb && !q.optional) nb.disabled = !t.value.trim();
+  }
+});
+
+init();
+})();
+</script>
+</body>
+</html>
